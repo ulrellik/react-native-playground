@@ -1,5 +1,6 @@
 import React from 'react';
-import { StyleSheet, Image, Text, Modal, View, Button } from 'react-native';
+import { StyleSheet, Image, Text, Modal, View, Button, TouchableOpacity } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const styles = StyleSheet.create({
   image: {
@@ -29,7 +30,9 @@ export default (props) => {
           <Text style={styles.text}>{props.item.value}</Text>
         </View>
       )}
-      <Button title="Delete" color="red" onPress={props.onDelete} />
+      <TouchableOpacity style={styles.container} onPress={props.onDelete}>
+        <Icon size={30} name="delete" color="red" />
+      </TouchableOpacity>
       <Button title="Close" onPress={props.onClose} />
     </Modal>
   );
