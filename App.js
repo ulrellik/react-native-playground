@@ -1,54 +1,119 @@
-import React, { Component } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { connect } from 'react-redux';
+import { Navigation } from 'react-native-navigation';
+import { Provider } from 'react-redux';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
-import { addPlace, deletePlace, selectPlace, deselectPlace } from './src/store/actions';
-import List from './src/components/List';
-import Input from './src/components/Input';
-import ItemDetails from './src/components/ItemDetails';
-import image from './src/assets/img_0420.jpg';
+import { name as appName } from './app.json';
+import configureStore from './src/store/configureStore';
+import AuthScreen from './src/screens/AuthScreen';
+import SharePlaceScreen from './src/screens/SharePlaceScreen';
+import FindPlaceScreen from './src/screens/FindPlaceScreen';
+import ItemDetailsScreen from './src/screens/ItemDetailsScreen';
+import SideMenuScreen from './src/screens/SideMenuScreen';
 
-type Props = {};
+const store = configureStore();
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-  },
+Navigation.registerComponentWithRedux(`${appName}.AuthScreen`, () => AuthScreen, Provider, store);
+Navigation.registerComponent(`${appName}.SideMenuScreen`, () => SideMenuScreen);
+Navigation.registerComponentWithRedux(`${appName}.SharePlaceScreen`, () => SharePlaceScreen, Provider, store);
+Navigation.registerComponentWithRedux(`${appName}.FindPlaceScreen`, () => FindPlaceScreen, Provider, store);
+Navigation.registerComponentWithRedux(`${appName}.ItemDetailsScreen`, () => ItemDetailsScreen, Provider, store);
+
+
+Navigation.events().registerAppLaunchedListener(() => {
+  Navigation.setRoot({
+    root: {
+      stack: {
+        children: [{
+          component: {
+            name: `${appName}.AuthScreen`,
+          },
+        }],
+        options: {
+          topBar: {
+            title: {
+              text: 'Welcome screen',
+            },
+          },
+        },
+      },
+    },
+  });
 });
 
-export class App extends Component<Props> {
-  render() {
-    return (
-      <View style={styles.container}>
-        <ItemDetails
-          item={this.props.selectedPlace}
-          onDelete={this.props.onDeletePlace}
-          onClose={this.props.onDeselectPlace}
-        />
-        <Input
-          onPress={this.props.onAddPlace}
-        />
-        <List
-          list={this.props.places}
-          onPressItem={this.props.onSelectPlace}
-        />
-      </View>
-    );
-  }
+// eslint-disable-next-line
+export async function changeToTabs() {
+  const menuButton = {
+    id: 'menu',
+    icon: await Icon.getImageSource('menu', 30),
+  };
+
+  const findScreen = { stack: {
+    children: [
+      { component: {
+        name: `${appName}.FindPlaceScreen`,
+        options: {
+          bottomTab: {
+            text: 'Find Place',
+            icon: await Icon.getImageSource('map', 30),
+          },
+          topBar: {
+            title: {
+              text: 'Select a place',
+            },
+            leftButtons: [menuButton],
+          },
+        },
+      } },
+    ],
+  } };
+
+  const shareScreen = { stack: {
+    children: [
+      { component: {
+        name: `${appName}.SharePlaceScreen`,
+        options: {
+          bottomTab: {
+            text: 'Share Place',
+            icon: await Icon.getImageSource('share', 30),
+          },
+          topBar: {
+            title: {
+              text: 'Add a place',
+            },
+            leftButtons: [menuButton],
+          },
+        },
+      } },
+    ],
+  } };
+
+  // const shareScreen = { component: {
+  //   name: `${appName}.SharePlaceScreen`,
+  //   options: {
+  //     bottomTab: {
+  //       text: 'Share Place',
+  //       icon: await Icon.getImageSource('share', 30),
+  //     },
+  //     topBar: {
+  //       leftButtons: [menuButton],
+  //     },
+  //   },
+  // } };
+
+  Navigation.setRoot({ root: { sideMenu: {
+    left: {
+      component: {
+        name: `${appName}.SideMenuScreen`,
+      },
+    },
+    center: { bottomTabs: {
+      children: [
+        findScreen,
+        shareScreen,
+      ],
+    } },
+    // right: {
+    //   component: {},
+    // },
+  } } });
 }
-
-const mapStateToProps = state => ({
-  places: state.places.places,
-  selectedPlace: state.places.selectedPlace,
-});
-
-const mapDispatchToProps = dispatch => ({
-  onAddPlace: place => dispatch(addPlace(place)),
-  onDeletePlace: () => dispatch(deletePlace()),
-  onSelectPlace: key => dispatch(selectPlace(key)),
-  onDeselectPlace: () => dispatch(deselectPlace()),
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(App);

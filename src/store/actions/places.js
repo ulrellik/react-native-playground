@@ -5,8 +5,9 @@ export const addPlace = place => ({
   place,
 });
 
-export const deletePlace = () => ({
+export const deletePlace = key => ({
   type: DELETE_PLACE,
+  key: key,
 });
 
 export const selectPlace = key => ({
